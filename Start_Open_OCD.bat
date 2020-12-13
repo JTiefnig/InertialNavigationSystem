@@ -1,0 +1,1 @@
+C:/Tools/OpenOCD-20190210-0.10.0/bin/openocd.exe -f C:\Users\johan\Desktop\GyrotoEuler\stm32l432kc_nucleo.cfg
