@@ -40,7 +40,7 @@ public:
 
 
     void SendInt(const char* id, int value);
-    void SendFloat(const char* id, float value);
+    void SendFloat(unsigned char id, float value);
     void SendDouble(unsigned char id, double value);
     void SendShort(const char* id, int16_t value);
 

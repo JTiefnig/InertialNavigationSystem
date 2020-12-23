@@ -34,16 +34,18 @@ void SerialProtocol::SendInt(const char* id, int value)
 
 
 
-void SerialProtocol::SendFloat(const char* id, float value)
+void SerialProtocol::SendFloat(unsigned char id, float value)
 {
-    // int siz =sizeof(float);
-    // SerialMessage msg;
-    // msg.id = id;
-    // msg.typeRep = 'f';
-    // msg.datalenght = siz;
-    // msg.data = (char*)(&value); // littlebit crazy type punning
+    int siz =sizeof(float);
+    SerialMessage msg;
 
-    // SendData(msg);
+    msg.mtype = MessageType::SEND_DATA;
+
+    msg.dlc = siz;
+    msg.id = id;
+    msg.data = (char*)(&value); // littlebit crazy type punning
+
+    SendData(msg);
 }
 
 

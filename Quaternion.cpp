@@ -29,7 +29,7 @@ Quaternion & Quaternion::operator+=(const Quaternion &q) {
     return *this;
 }
 
-Quaternion & Quaternion::operator*=(float scale) {
+Quaternion & Quaternion::operator*=(double scale) {
     a *= scale;
     b *= scale;
     c *= scale;
@@ -37,14 +37,14 @@ Quaternion & Quaternion::operator*=(float scale) {
     return *this;
 }
 
-float Quaternion::norm() const {
-    float norm2 = a*a + b*b + c*c + d*d;
+double Quaternion::norm() const {
+    double norm2 = a*a + b*b + c*c + d*d;
     return sqrt(norm2);
 }
 
 // 400B
 Quaternion & Quaternion::normalize() {
-    float n = norm();
+    double n = norm();
     a /= n;
     b /= n;
     c /= n;
@@ -55,14 +55,14 @@ Quaternion & Quaternion::normalize() {
 // This method takes an euler rotation in rad and converts it to an equivilent 
 // Quaternion rotation.
 // 800B
-const Quaternion Quaternion::from_euler_rotation(float x, float y, float z) {
-    float c1 = cos(y/2);
-    float c2 = cos(z/2);
-    float c3 = cos(x/2);
+const Quaternion Quaternion::from_euler_rotation(double x, double y, double z) {
+    double c1 = cos(y/2);
+    double c2 = cos(z/2);
+    double c3 = cos(x/2);
 
-    float s1 = sin(y/2);
-    float s2 = sin(z/2);
-    float s3 = sin(x/2);
+    double s1 = sin(y/2);
+    double s2 = sin(z/2);
+    double s3 = sin(x/2);
     Quaternion ret;
     ret.a = c1 * c2 * c3 - s1 * s2 * s3;
     ret.b = s1 * s2 * c3 + c1 * c2 * s3;
@@ -71,16 +71,16 @@ const Quaternion Quaternion::from_euler_rotation(float x, float y, float z) {
     return ret;
 }
 
-const Quaternion Quaternion::from_euler_rotation_approx(float x, float y, float z) {
+const Quaternion Quaternion::from_euler_rotation_approx(double x, double y, double z) {
     // approximage cos(theta) as 1 - theta^2 / 2
-    float c1 = 1 - (y * y / 8);
-    float c2 = 1 - (z * z / 8);
-    float c3 = 1 - (x * x / 8);
+    double c1 = 1 - (y * y / 8);
+    double c2 = 1 - (z * z / 8);
+    double c3 = 1 - (x * x / 8);
 
     // appromixate sin(theta) as theta
-    float s1 = y/2;
-    float s2 = z/2;
-    float s3 = x/2;
+    double s1 = y/2;
+    double s2 = z/2;
+    double s3 = x/2;
     Quaternion ret;
     ret.a = c1 * c2 * c3 - s1 * s2 * s3;
     ret.b = s1 * s2 * c3 + c1 * c2 * s3;
@@ -128,7 +128,7 @@ const Quaternion Quaternion::rotation_between_vectors(const Quaternion& q) const
     return ret;
 }
 
-float Quaternion::dot_product(const Quaternion& q) const {
+double Quaternion::dot_product(const Quaternion& q) const {
     return a * q.a + b * q.b + c * q.c + d * q.d;
 }
 
@@ -141,7 +141,7 @@ const Quaternion Quaternion::rotate(const Quaternion& q) const {
 // rotate between 0-1 as much as it would normally rotate.
 // The math here is pretty sloppy but should work for 
 // most cases.
-Quaternion & Quaternion::fractional(float f) {
+Quaternion & Quaternion::fractional(double f) {
     a = 1-f + f*a;
     b *= f;
     c *= f;

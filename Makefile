@@ -39,7 +39,7 @@ VPATH = ..
 ###############################################################################
 # Project settings
 
-PROJECT := GyrotoEuler
+PROJECT := MUC_INS
 
 
 # Project settings

@@ -42,20 +42,17 @@ int main()
     // Initalize Serial Port
     SerialProtocol serialPc(USBTX, USBRX);
     
-    // LCD // shows splash screen ...
+    // Oled Display // shows splash screen during calibration...
     I2CPreInit gI2C(PB_7,PB_6);
     Adafruit_SSD1306_I2c gOled2(gI2C,PB_5, 0x78, 64, 128);
-
     
     // Initialize MPU
     mpu.init();
     // Calibrate Sensor - Dont move senosr on startup!!
     mpu.Calibrate();
 
-
     gOled2.clearDisplay();
     gOled2.setTextSize(1);
-
 
     int counter =0;
 
@@ -65,14 +62,13 @@ int main()
 
     while(1) {
         
-        // Clear Display 
-        gOled2.clearDisplay();
-        gOled2.setTextCursor(0, 2);
-        gOled2.printf("%u \n\r" , counter);
+        
+        
 
         // Possibility to Zero the Roation
         if(setToZero)
             q = Quaternion();
+            
 
         //Read in Gyro Data via library function
         DataVector read = mpu.GetGyroData();
@@ -92,50 +88,61 @@ int main()
         
         // Nummeric Integration - time increment
         q += (q*D_Q)*dt;
-
         // always normalize
         q = q.normalize();
 
         
         
+        
 
+        if(counter % 5 == 0)
+        {
+            // Get Euler angels from Quaternion
+            EulerAngles AA = q.ToEulerAngles();
+            // Clear Display 
+            gOled2.clearDisplay();
+            gOled2.setTextCursor(0, 2);
+            gOled2.printf("Psi:    %.2f \n\r" , AA.yaw*RADtoDEG);
+            gOled2.printf("Theta:  %.2f \n\r" , AA.pitch*RADtoDEG);
+            gOled2.printf("Phi:    %.2f \n\r" , AA.roll*RADtoDEG);
+            gOled2.printf("%u \n\r" , counter);
+
+            gOled2.printf("dt: %f \n\r" , dt);
+
+
+            // very basic compass animation for yaw
+            int offx = 100, offy = 32;
+            float r= 10;
+            float a = AA.yaw;
+            float c = cos(a);
+            float s = sin(a);
+
+            gOled2.drawLine(offx+r*s, offy+c*r, offx-s*r, offy-c*r, 1);
+            gOled2.drawLine(offx+r*s+c*3, offy+c*r-s*3, offx+s*r-c*3, offy+c*r+s*3, 1);
+
+            gOled2.display();
+
+            // Send Data via Serial Port --- Sending Unit Quaternion directly
+            serialPc.SendDouble(1, q.a);
+            serialPc.SendDouble(2, q.b);
+            serialPc.SendDouble(3, q.c);
+            serialPc.SendDouble(4, q.d);
+            
+        }
+        // Print to Oled Screen
+
+        
+
+        // increment
+        counter++;
+            
+
+        // This calculation will lead to gimbal lock! 
         // Alternative calculation  (f = PI / 180°) + timeintegration Euler explicit (phi += dphi* dt )
         //double f = 3.14159265/180.0d;
         //phi += (dbeta*sin(phi*f)+dgamma*cos(phi*f))/cos(theta*f)*dt;
         //theta += (dbeta*cos(phi*f)-dgamma*sin(phi*f))*dt;
         //psi += (dalpha+(dbeta*sin(phi*f)+dgamma*cos(phi*f))*tan(theta*f))*dt;
-    
-        // Get Euler angels from Quaternion
-        EulerAngles AA = q.ToEulerAngles();
-        
-        // Print to Oled Screen
-        gOled2.printf("Psi:    %.2f \n\r" , AA.yaw*RADtoDEG);
-        gOled2.printf("Theta:  %.2f \n\r" , AA.pitch*RADtoDEG);
-        gOled2.printf("Phi:    %.2f \n\r" , AA.roll*RADtoDEG);
-        
 
-        gOled2.printf("dt: %f \n\r" , dt);
-
-        // Send Data via Serial Port
-        serialPc.SendDouble(1, AA.yaw*RADtoDEG);
-        serialPc.SendDouble(2, AA.pitch*RADtoDEG);
-        serialPc.SendDouble(3, AA.roll*RADtoDEG);
-        
-            
-
-        double psi = AA.yaw*RADtoDEG;
-        // weird type punning 
-        uint16_t psiINT = (uint16_t)((psi+180)/360.0 * 0xff); 
-
-        char byte1 = ((char*)&psiINT)[0];
-        char byte2 = ((char*)&psiINT)[1];
-
-        gOled2.printf("MyBytes: %c - %c \n\r" , byte1, byte2);
-
-        gOled2.display();
-
-        // increment
-        counter++;
-            
     }
 }
