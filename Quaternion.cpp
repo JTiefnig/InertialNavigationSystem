@@ -1,17 +1,13 @@
-//
-// This code is mostly based on the work of: https://github.com/carrino 
+// credits to https://github.com/carrino 
 // 
 //
-
-
 
 
 #include "Quaternion.h"
 #include <math.h>
 
 
-// http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/arithmetic/index.htm
-// 800B
+
 Quaternion & Quaternion::operator*=(const Quaternion &q) {
     Quaternion ret;
     ret.a = a*q.a - b*q.b - c*q.c - d*q.d;
@@ -42,7 +38,7 @@ double Quaternion::norm() const {
     return sqrt(norm2);
 }
 
-// 400B
+
 Quaternion & Quaternion::normalize() {
     double n = norm();
     a /= n;
@@ -52,9 +48,7 @@ Quaternion & Quaternion::normalize() {
     return *this;
 }
 
-// This method takes an euler rotation in rad and converts it to an equivilent 
-// Quaternion rotation.
-// 800B
+
 const Quaternion Quaternion::from_euler_rotation(double x, double y, double z) {
     double c1 = cos(y/2);
     double c2 = cos(z/2);
@@ -72,12 +66,11 @@ const Quaternion Quaternion::from_euler_rotation(double x, double y, double z) {
 }
 
 const Quaternion Quaternion::from_euler_rotation_approx(double x, double y, double z) {
-    // approximage cos(theta) as 1 - theta^2 / 2
+
     double c1 = 1 - (y * y / 8);
     double c2 = 1 - (z * z / 8);
     double c3 = 1 - (x * x / 8);
 
-    // appromixate sin(theta) as theta
     double s1 = y/2;
     double s2 = z/2;
     double s3 = x/2;
@@ -97,51 +90,28 @@ const Quaternion Quaternion::conj() const {
     return ret;
 }
 
-// This method takes two vectors and computes the rotation vector between them.
-// Both the left and right hand sides must be pure vectors (a == 0)
-// Both the left and right hand sides must normalized already.
-// This computes the rotation that will tranform this to q.
-// 500B
-const Quaternion Quaternion::rotation_between_vectors(const Quaternion& q) const {
-    // http://www.euclideanspace.com/maths/algebra/vectors/angleBetween/
-    // We want to compute the below values.
-    // w = 1 + v1•v2
-    // x = (v1 x v2).x 
-    // y = (v1 x v2).y
-    // z = (v1 x v2).z
 
-    // Instead of writing the below code direclty, we reduce code size by
-    // just using multiplication to implement it.
-    //Quaternion ret;
-    //ret.a = 1 + b * q.b + c * q.c + d * q.d;
-    //ret.b = c * q.d - d * q.c;
-    //ret.c = d * q.b - b * q.d;
-    //ret.d = b * q.c - c * q.b;
-    //ret.normalize();
-    //return ret;
-
-    // From wikipedia https://en.wikipedia.org/wiki/Quaternion#Quaternions_and_the_geometry_of_R3
-    // The cross product p x q is just the vector part of multiplying p * q
+const Quaternion Quaternion::rotation_between_vectors(const Quaternion& q) const 
+{
     Quaternion ret = (*this) * q;
     ret.a = 1 - ret.a;
     ret.normalize();
     return ret;
 }
 
-double Quaternion::dot_product(const Quaternion& q) const {
+double Quaternion::dot_product(const Quaternion& q) const 
+{
     return a * q.a + b * q.b + c * q.c + d * q.d;
 }
 
-// This will roate the input vector by this normalized rotation quaternion.
-const Quaternion Quaternion::rotate(const Quaternion& q) const {
+const Quaternion Quaternion::rotate(const Quaternion& q) const 
+{
     return (*this) * q * conj();
 }
 
-// This modifies this normalized rotation quaternion and makes it 
-// rotate between 0-1 as much as it would normally rotate.
-// The math here is pretty sloppy but should work for 
-// most cases.
-Quaternion & Quaternion::fractional(double f) {
+
+Quaternion & Quaternion::fractional(double f) 
+{
     a = 1-f + f*a;
     b *= f;
     c *= f;
@@ -150,7 +120,8 @@ Quaternion & Quaternion::fractional(double f) {
 }
 
 
-EulerAngles Quaternion::ToEulerAngles() const {
+EulerAngles Quaternion::ToEulerAngles() const 
+{
      EulerAngles angles;
 
     // roll (x-axis rotation)

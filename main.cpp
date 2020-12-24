@@ -83,20 +83,26 @@ int main()
         dt = t.read();
         t.reset(); // timer t zurücksetzen
 
+
+        // --------Approach A
         // create a Quaternion that represenst 
-        Quaternion D_Q = Quaternion::from_euler_rotation_approx(dalpha*DEGtoRAD, dbeta*DEGtoRAD, dgamma*DEGtoRAD);
+        //Quaternion D_Q = Quaternion::from_euler_rotation_approx(dalpha*DEGtoRAD, dbeta*DEGtoRAD, dgamma*DEGtoRAD);
         
         // Nummeric Integration - time increment
-        q += (q*D_Q)*dt;
+        // q.normalize();
+        //q += (q*D_Q)*dt;
         // always normalize
-        q = q.normalize();
-
         
-        
-        
+        // --------Approach B
+        // In testing it works even better for time integration ... more stable approach !!
+        q *= Quaternion::from_euler_rotation_approx(dalpha*dt*DEGtoRAD, dbeta*dt*DEGtoRAD, dgamma*dt*DEGtoRAD);
+   
 
         if(counter % 5 == 0)
         {
+            Quaternion q2 = q;
+
+            q2.normalize();
             // Get Euler angels from Quaternion
             EulerAngles AA = q.ToEulerAngles();
             // Clear Display 
@@ -123,10 +129,10 @@ int main()
             gOled2.display();
 
             // Send Data via Serial Port --- Sending Unit Quaternion directly
-            serialPc.SendDouble(1, q.a);
-            serialPc.SendDouble(2, q.b);
-            serialPc.SendDouble(3, q.c);
-            serialPc.SendDouble(4, q.d);
+            serialPc.SendDouble(1, q2.a);
+            serialPc.SendDouble(2, q2.b);
+            serialPc.SendDouble(3, q2.c);
+            serialPc.SendDouble(4, q2.d);
             
         }
         // Print to Oled Screen
